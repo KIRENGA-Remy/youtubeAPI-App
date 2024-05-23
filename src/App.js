@@ -1,25 +1,53 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react"
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+import { Grid } from "@material-ui/core"
+import youtube from "./api/youtube"
+import { SearchBar, VideoDetail, VideoList } from "./components"
+import { useEffect } from "react"
+
+const App = () =>{
+    const [Videos, setVideos] = useState([]);
+    const [SelectedVideos, setSelectedVideos] = useState(null);
+
+    useEffect(()=>{
+        handleSubmit("pdf generation using react and node");
+    },[]);
+    
+    const onVideoSelect = (video) => {
+        setSelectedVideos(video);
+      }
+      
+
+    const handleSubmit = async (searchTerm) =>{
+        const response = await youtube.get('search', {
+            params: {
+                part: "snippet",
+                maxResults: 5,
+                key: process.env.REACT_APP_YOUTUBE_API_KEY,
+                q:searchTerm,
+              }
+        }) 
+        // console.log(response.data.items);
+        setVideos(response.data.items);
+        setSelectedVideos(response.data.items[0]);
+    }
+    return (
+        <Grid justifyContent="center" container spacing={10}>
+            <Grid item xs={12}>
+                <Grid container spacing={10}>
+                    <Grid item xs={12}>
+                        <SearchBar onFormSubmit={handleSubmit}/>
+                    </Grid>
+                    <Grid item xs={8}>
+                        <VideoDetail video={SelectedVideos}/>
+                    </Grid>
+                    <Grid item xs={4}>
+                        <VideoList Videos={Videos} onVideoSelect={onVideoSelect}/>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Grid>
+    )
 }
-
-export default App;
+export default App
